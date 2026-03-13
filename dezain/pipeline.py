@@ -88,7 +88,7 @@ def run_pipeline(
 
     # 5. Generate code
     console.print("\n[bold]Step 4:[/] Generating React + TypeScript components...")
-    orchestrator = LLMOrchestrator(config.llm, registry)
+    orchestrator = LLMOrchestrator(config.llm, registry, console=console)
     result = orchestrator.generate_from_design(ir_design)
     console.print(
         f"  ✓ Generated [green]{len(result.files)}[/] files ({result.tokens_used} tokens used)"

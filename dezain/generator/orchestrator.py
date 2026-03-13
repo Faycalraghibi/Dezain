@@ -4,8 +4,11 @@ from __future__ import annotations
 
 import json
 import logging
+import sys
 import time
 from typing import Any
+
+from rich.console import Console
 
 from dezain.config import LLMConfig
 from dezain.design_system.registry import ComponentRegistry
@@ -26,10 +29,19 @@ RETRY_DELAY_BASE = 2.0  # seconds
 class LLMOrchestrator:
     """Orchestrates LLM calls to generate React components from IR designs."""
 
-    def __init__(self, config: LLMConfig, registry: ComponentRegistry | None = None) -> None:
+    def __init__(
+        self,
+        config: LLMConfig,
+        registry: ComponentRegistry | None = None,
+        *,
+        stream: bool = True,
+        console: Console | None = None,
+    ) -> None:
         self._config = config
         self._registry = registry or ComponentRegistry()
         self._total_tokens = 0
+        self._stream = stream
+        self._console = console or Console()
 
     def generate_from_design(self, design: IRDesign) -> GenerationResult:
         """Generate components for a full design.
@@ -136,15 +148,51 @@ class LLMOrchestrator:
 
         return ""  # Unreachable but satisfies type checker
 
+    def _print_token(self, token: str) -> None:
+        """Print a single streamed token to the console."""
+        if self._stream and token:
+            sys.stdout.write(token)
+            sys.stdout.flush()
+
+    def _end_stream(self) -> None:
+        """Print a newline after streaming completes."""
+        if self._stream:
+            sys.stdout.write("\n")
+            sys.stdout.flush()
+
     def _call_openai(self, user_prompt: str) -> str:
-        """Call OpenAI API (or compatible like OpenRouter)."""
+        """Call OpenAI API (or compatible like OpenRouter) with streaming."""
         from openai import OpenAI
 
-        client_kwargs = {"api_key": self._config.openai_api_key}
+        client_kwargs: dict[str, Any] = {"api_key": self._config.openai_api_key}
         if self._config.openai_base_url:
             client_kwargs["base_url"] = self._config.openai_base_url
 
         client = OpenAI(**client_kwargs)
+
+        if self._stream:
+            self._console.print("  [dim]Streaming response...[/]")
+            response_stream = client.chat.completions.create(
+                model=self._config.openai_model,
+                messages=[
+                    {"role": "system", "content": SYSTEM_PROMPT},
+                    {"role": "user", "content": user_prompt},
+                ],
+                temperature=0.2,
+                stream=True,
+            )
+
+            collected: list[str] = []
+            for chunk in response_stream:
+                delta = chunk.choices[0].delta if chunk.choices else None
+                if delta and delta.content:
+                    self._print_token(delta.content)
+                    collected.append(delta.content)
+
+            self._end_stream()
+            return "".join(collected)
+
+        # Non-streaming fallback (for tests)
         response = client.chat.completions.create(
             model=self._config.openai_model,
             messages=[
@@ -163,21 +211,43 @@ class LLMOrchestrator:
         return content or ""
 
     def _call_ollama(self, user_prompt: str) -> str:
-        """Call Ollama local LLM."""
+        """Call Ollama local LLM with streaming."""
         import requests
 
         url = f"{self._config.ollama_base_url}/api/chat"
-        payload = {
+        payload: dict[str, Any] = {
             "model": self._config.ollama_model,
             "messages": [
                 {"role": "system", "content": SYSTEM_PROMPT},
                 {"role": "user", "content": user_prompt},
             ],
-            "stream": False,
+            "stream": self._stream,
             "format": "json",
             "options": {"temperature": 0.2},
         }
 
+        if self._stream:
+            self._console.print("  [dim]Streaming response...[/]")
+            resp = requests.post(url, json=payload, timeout=900, stream=True)
+            resp.raise_for_status()
+
+            collected: list[str] = []
+            for line in resp.iter_lines(decode_unicode=True):
+                if not line:
+                    continue
+                try:
+                    chunk = json.loads(line)
+                    token = chunk.get("message", {}).get("content", "")
+                    if token:
+                        self._print_token(token)
+                        collected.append(token)
+                except json.JSONDecodeError:
+                    continue
+
+            self._end_stream()
+            return "".join(collected)
+
+        # Non-streaming fallback
         resp = requests.post(url, json=payload, timeout=900)
         resp.raise_for_status()
         data = resp.json()
