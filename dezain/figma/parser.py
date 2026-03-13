@@ -54,13 +54,11 @@ def parse_figma_file(figma_file: FigmaFile) -> IRDesign:
     tokens: list[IRToken] = []
     nodes: list[IRNode] = []
 
-    # The document root contains canvas (page) children
     for canvas in figma_file.document.children:
         for child in canvas.children:
             ir_node = _convert_node(child)
             nodes.append(ir_node)
 
-    # Extract tokens from file styles
     tokens.extend(_extract_tokens_from_file(figma_file))
 
     return IRDesign(
@@ -115,7 +113,6 @@ def _extract_styles(node: FigmaNode) -> IRStyles:
     background: IRColor | None = None
     foreground: IRColor | None = None
 
-    # Background from fills
     for fill in node.fills:
         if fill.visible and fill.color:
             background = IRColor(
@@ -126,7 +123,6 @@ def _extract_styles(node: FigmaNode) -> IRStyles:
             )
             break  # Use first visible fill
 
-    # Foreground (text color) from style
     if node.style and node.fills:
         for fill in node.fills:
             if fill.visible and fill.color:
@@ -138,7 +134,6 @@ def _extract_styles(node: FigmaNode) -> IRStyles:
                 )
                 break
 
-    # Font
     font: IRFont | None = None
     if node.style:
         s = node.style
@@ -151,7 +146,6 @@ def _extract_styles(node: FigmaNode) -> IRStyles:
             text_align=s.textAlignHorizontal.lower(),
         )
 
-    # Padding
     padding = IRSpacing(
         top=node.paddingTop,
         right=node.paddingRight,
@@ -159,7 +153,6 @@ def _extract_styles(node: FigmaNode) -> IRStyles:
         left=node.paddingLeft,
     )
 
-    # Border
     border_color: IRColor | None = None
     for stroke in node.strokes:
         if stroke.visible and stroke.color:
@@ -177,7 +170,6 @@ def _extract_styles(node: FigmaNode) -> IRStyles:
         radius=node.cornerRadius or 0,
     )
 
-    # Shadows
     shadows: list[IRShadow] = []
     for effect in node.effects:
         if effect.visible and effect.type == "DROP_SHADOW":

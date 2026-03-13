@@ -81,7 +81,6 @@ def load_config(
 
     _ensure_env()
 
-    # Start with env-based defaults
     config_data: dict[str, Any] = {
         "figma": {
             "token": os.getenv("FIGMA_TOKEN", ""),
@@ -100,14 +99,12 @@ def load_config(
         },
     }
 
-    # Merge YAML config if available
     yaml_path = config_path or Path("dezain.config.yaml")
     if yaml_path.exists():
         with open(yaml_path) as f:
             yaml_data = yaml.safe_load(f) or {}
         config_data = _deep_merge(config_data, yaml_data)
 
-    # Apply runtime overrides
     if overrides:
         config_data = _deep_merge(config_data, overrides)
 

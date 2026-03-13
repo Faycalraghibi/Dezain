@@ -60,7 +60,6 @@ class LLMOrchestrator:
         warnings: list[str] = []
         errors: list[str] = []
 
-        # For designs with few top-level nodes, generate as a page
         if len(design.nodes) <= 5:
             prompt = build_page_prompt(design, ds_components)
             result = self._call_llm(prompt)
@@ -69,7 +68,6 @@ class LLMOrchestrator:
             warnings.extend(warns)
             errors.extend(errs)
         else:
-            # Split into per-component tasks
             for node in design.nodes:
                 component_nodes = _extract_component_nodes(node)
                 for comp_node in component_nodes:
@@ -80,7 +78,6 @@ class LLMOrchestrator:
                     warnings.extend(warns)
                     errors.extend(errs)
 
-        # Generate barrel file
         if all_files:
             barrel = _generate_barrel_file(all_files)
             all_files.append(barrel)
@@ -270,7 +267,6 @@ class LLMOrchestrator:
         try:
             parsed = json.loads(raw)
         except json.JSONDecodeError as e:
-            # Try to extract JSON from the response
             extracted = _extract_json(raw)
             if extracted is not None:
                 parsed = extracted
@@ -279,7 +275,6 @@ class LLMOrchestrator:
                 errors.append(f"Failed to parse LLM response as JSON: {e}")
                 return files, warnings, errors
 
-        # Handle both array and {"files": [...]} formats
         file_list: list[dict[str, Any]]
         if isinstance(parsed, list):
             file_list = parsed
@@ -323,7 +318,6 @@ def _generate_barrel_file(files: list[GeneratedFile]) -> GeneratedFile:
     """Generate an index.ts barrel file re-exporting all components."""
     exports: list[str] = []
     for f in files:
-        # Extract component name from path
         path = f.path.replace("\\", "/")
         if path.endswith(".tsx") or path.endswith(".ts"):
             module = path.rsplit("/", 1)[-1].rsplit(".", 1)[0]
@@ -338,7 +332,6 @@ def _generate_barrel_file(files: list[GeneratedFile]) -> GeneratedFile:
 
 def _extract_json(text: str) -> Any | None:
     """Try to extract a JSON array or object from text with surrounding content."""
-    # Try to find JSON array
     start = text.find("[")
     if start != -1:
         depth = 0
@@ -353,7 +346,6 @@ def _extract_json(text: str) -> Any | None:
                 except json.JSONDecodeError:
                     break
 
-    # Try to find JSON object
     start = text.find("{")
     if start != -1:
         depth = 0

@@ -47,14 +47,12 @@ def validate_generated_code(output_dir: Path) -> ValidationResult:
 
     logger.info("Validating %d TypeScript files in %s", len(tsx_files), output_dir)
 
-    # Basic syntax checks
     for file_path in tsx_files:
         errors = _check_file_basics(file_path)
         if errors:
             result.lint_errors.extend(errors)
             result.passed = False
 
-    # Try TypeScript compiler if available
     tsc_errors = _run_tsc(output_dir)
     if tsc_errors:
         result.typescript_errors.extend(tsc_errors)
@@ -78,16 +76,13 @@ def _check_file_basics(file_path: Path) -> list[str]:
         errors.append(f"{file_path}: File is empty")
         return errors
 
-    # Check for common issues
     if "any" in content and "// @ts-ignore" not in content:
-        # Rough check — not perfect but catches obvious violations
         lines = content.split("\n")
         for i, line in enumerate(lines, 1):
             stripped = line.strip()
             if ": any" in stripped or "as any" in stripped:
                 errors.append(f"{file_path}:{i}: Use of 'any' type detected")
 
-    # Check for export
     if "export" not in content:
         errors.append(f"{file_path}: No exports found — components should be exported")
 

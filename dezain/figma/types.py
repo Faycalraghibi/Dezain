@@ -85,7 +85,6 @@ class FigmaNode(BaseModel):
     type: str
     children: list[FigmaNode] = Field(default_factory=list)
 
-    # Visual properties
     fills: list[FigmaPaint] = Field(default_factory=list)
     strokes: list[FigmaPaint] = Field(default_factory=list)
     effects: list[FigmaEffect] = Field(default_factory=list)
@@ -93,11 +92,9 @@ class FigmaNode(BaseModel):
     visible: bool = True
     clipsContent: bool = False  # noqa: N815
 
-    # Geometry
     absoluteBoundingBox: dict[str, float] | None = None  # noqa: N815
     size: dict[str, float] | None = None
 
-    # Layout
     layoutMode: str | None = None  # noqa: N815
     primaryAxisAlignItems: str | None = None  # noqa: N815
     counterAxisAlignItems: str | None = None  # noqa: N815
@@ -107,20 +104,15 @@ class FigmaNode(BaseModel):
     paddingBottom: float = 0  # noqa: N815
     paddingLeft: float = 0  # noqa: N815
 
-    # Text-specific
     characters: str | None = None
     style: FigmaTypeStyle | None = None
 
-    # Component-specific
     componentId: str | None = None  # noqa: N815
 
-    # Corner radius
     cornerRadius: float | None = None  # noqa: N815
 
-    # Stroke weight
     strokeWeight: float | None = None  # noqa: N815
 
-    # Extra metadata
     extraData: dict[str, Any] = Field(default_factory=dict)  # noqa: N815
 
 

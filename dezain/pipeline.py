@@ -41,7 +41,6 @@ def run_pipeline(
     Returns:
         GenerationResult with all generated files and status.
     """
-    # 1. Load config
     if config is None:
         overrides = {}
         if file_url:
@@ -54,7 +53,6 @@ def run_pipeline(
 
     console.print(Panel("🎨 [bold cyan]Dezain[/] — Design to Code", expand=False))
 
-    # 2. Fetch Figma data
     console.print("\n[bold]Step 1:[/] Fetching design data...")
     if sample_mode:
         console.print("  → Using sample data (demo mode)")
@@ -73,7 +71,6 @@ def run_pipeline(
 
     console.print(f"  ✓ Loaded design: [green]{figma_file.name}[/]")
 
-    # 3. Parse to IR
     console.print("\n[bold]Step 2:[/] Parsing design to intermediate representation...")
     ir_design = parse_figma_file(figma_file)
     console.print(
@@ -81,12 +78,10 @@ def run_pipeline(
         f"[green]{len(ir_design.tokens)}[/] tokens"
     )
 
-    # 4. Set up design system registry
     console.print("\n[bold]Step 3:[/] Configuring design system...")
     registry = ComponentRegistry(config.component_mappings)
     console.print(f"  ✓ Registered [green]{len(config.component_mappings)}[/] component mappings")
 
-    # 5. Generate code
     console.print("\n[bold]Step 4:[/] Generating React + TypeScript components...")
     orchestrator = LLMOrchestrator(config.llm, registry, console=console)
     result = orchestrator.generate_from_design(ir_design)
@@ -103,12 +98,10 @@ def run_pipeline(
             console.print(f"  [red]✗ {e}[/]")
         return result
 
-    # 6. Write output
     console.print(f"\n[bold]Step 5:[/] Writing files to {effective_output_dir}...")
     written = write_generated_files(result.files, Path(effective_output_dir))
     console.print(f"  ✓ Wrote [green]{len(written)}[/] files")
 
-    # 7. Validate
     console.print("\n[bold]Step 6:[/] Validating generated code...")
     validation = validate_generated_code(Path(effective_output_dir))
     if validation.passed:
@@ -120,7 +113,6 @@ def run_pipeline(
         for err in validation.lint_errors[:5]:
             console.print(f"    [red]{err}[/]")
 
-    # 8. Report
     report = generate_summary_report(
         result.files, result.warnings, result.errors, result.tokens_used, Path(effective_output_dir)
     )
