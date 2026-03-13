@@ -1,8 +1,4 @@
-"""Figma REST API client.
-
-Authenticates with a personal access token and fetches design data
-from the Figma API. Supports loading from sample files for demo mode.
-"""
+# Copyright © 2026 Dezain. All rights reserved.
 
 from __future__ import annotations
 

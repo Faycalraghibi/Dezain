@@ -1,8 +1,4 @@
-"""Figma API Pydantic type definitions.
-
-These models represent the key structures returned by the Figma REST API.
-They are used to validate and type raw API responses before parsing into IR.
-"""
+# Copyright © 2026 Dezain. All rights reserved.
 
 from __future__ import annotations
 

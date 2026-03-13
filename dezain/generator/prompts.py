@@ -1,8 +1,5 @@
-"""Prompt templates for LLM-based code generation.
+# Copyright © 2026 Dezain. All rights reserved.
 
-Each template takes structured IR data and produces a prompt
-that instructs the LLM to generate React + TypeScript + TailwindCSS code.
-"""
 
 from __future__ import annotations
 

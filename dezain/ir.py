@@ -1,8 +1,4 @@
-"""Intermediate Representation (IR) models.
-
-These Pydantic models bridge Figma design data and code generation.
-They provide a normalized, provider-agnostic representation of the design.
-"""
+# Copyright © 2026 Dezain. All rights reserved.
 
 from __future__ import annotations
 

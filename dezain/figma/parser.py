@@ -1,8 +1,4 @@
-"""Figma JSON → IR parser.
-
-Recursively traverses the Figma node tree and converts it
-into the normalized Intermediate Representation (IR).
-"""
+# Copyright © 2026 Dezain. All rights reserved.
 
 from __future__ import annotations
 

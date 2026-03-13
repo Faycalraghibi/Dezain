@@ -1,8 +1,5 @@
-"""Configuration loader.
+# Copyright © 2026 Dezain. All rights reserved.
 
-Merges environment variables (.env), user config (dezain.config.yaml),
-and CLI overrides into a single validated config object.
-"""
 
 from __future__ import annotations
 

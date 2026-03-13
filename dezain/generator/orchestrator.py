@@ -1,8 +1,4 @@
-"""LLM orchestrator for code generation.
-
-Supports OpenAI and Ollama as LLM providers.
-Handles chunking, retries, and response parsing.
-"""
+# Copyright © 2026 Dezain. All rights reserved.
 
 from __future__ import annotations
 
@@ -182,10 +178,10 @@ class LLMOrchestrator:
             "options": {"temperature": 0.2},
         }
 
-        resp = requests.post(url, json=payload, timeout=120)
+        resp = requests.post(url, json=payload, timeout=900)
         resp.raise_for_status()
         data = resp.json()
-        return data.get("message", {}).get("content", "")
+        return str(data.get("message", {}).get("content", ""))
 
     def _parse_response(self, raw: str) -> tuple[list[GeneratedFile], list[str], list[str]]:
         """Parse LLM response JSON into GeneratedFile objects.

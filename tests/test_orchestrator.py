@@ -1,4 +1,4 @@
-"""Tests for the LLM orchestrator (with mocked LLM calls)."""
+# Copyright © 2026 Dezain. All rights reserved.
 
 from __future__ import annotations
 

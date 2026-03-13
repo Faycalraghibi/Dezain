@@ -1,7 +1,4 @@
-"""Design system token management.
-
-Extracts design tokens from IR data and maps them to TailwindCSS utility classes.
-"""
+# Copyright © 2026 Dezain. All rights reserved.
 
 from __future__ import annotations
 
@@ -27,8 +24,6 @@ def font_to_tailwind_classes(font: IRFont) -> list[str]:
     Returns a list of classes for font-size, font-weight, etc.
     """
     classes: list[str] = []
-
-    # Font size mapping (approximate to Tailwind scale)
     size_map = {
         12: "text-xs",
         14: "text-sm",
@@ -44,8 +39,6 @@ def font_to_tailwind_classes(font: IRFont) -> list[str]:
         96: "text-8xl",
         128: "text-9xl",
     }
-
-    # Find closest size
     closest_size = min(size_map.keys(), key=lambda s: abs(s - font.size))
     if abs(closest_size - font.size) <= 2:
         classes.append(size_map[closest_size])
@@ -53,7 +46,6 @@ def font_to_tailwind_classes(font: IRFont) -> list[str]:
         size_val = int(font.size) if font.size == int(font.size) else font.size
         classes.append(f"text-[{size_val}px]")
 
-    # Font weight
     weight_map = {
         100: "font-thin",
         200: "font-extralight",
@@ -67,7 +59,6 @@ def font_to_tailwind_classes(font: IRFont) -> list[str]:
     }
     classes.append(weight_map.get(font.weight, f"font-[{font.weight}]"))
 
-    # Text alignment
     align_map = {
         "left": "text-left",
         "center": "text-center",
@@ -77,7 +68,6 @@ def font_to_tailwind_classes(font: IRFont) -> list[str]:
     if font.text_align != "left":
         classes.append(align_map.get(font.text_align, "text-left"))
 
-    # Line height
     if font.line_height is not None and font.size > 0:
         ratio = font.line_height / font.size
         if abs(ratio - 1.0) < 0.1:
@@ -93,7 +83,6 @@ def font_to_tailwind_classes(font: IRFont) -> list[str]:
         else:
             classes.append(f"leading-[{font.line_height}px]")
 
-    # Letter spacing
     if font.letter_spacing is not None and font.letter_spacing != 0:
         classes.append(f"tracking-[{font.letter_spacing}px]")
 
@@ -112,7 +101,6 @@ def spacing_to_tailwind(spacing: IRSpacing, prefix: str = "p") -> list[str]:
     """
     classes: list[str] = []
 
-    # Tailwind spacing scale (in px): 0, 1(4px), 2(8px), 3(12px), 4(16px), etc.
     def _to_tw(value: float) -> str:
         scale = {0: "0", 4: "1", 8: "2", 12: "3", 16: "4", 20: "5", 24: "6", 32: "8", 40: "10"}
         closest = min(scale.keys(), key=lambda s: abs(s - value))
@@ -120,7 +108,6 @@ def spacing_to_tailwind(spacing: IRSpacing, prefix: str = "p") -> list[str]:
             return scale[closest]
         return f"[{value}px]"
 
-    # Check if all sides are equal
     if spacing.top == spacing.right == spacing.bottom == spacing.left:
         if spacing.top > 0:
             classes.append(f"{prefix}-{_to_tw(spacing.top)}")
@@ -162,5 +149,4 @@ def tokens_to_tailwind_config(tokens: list[IRToken]) -> dict[str, dict[str, str]
         elif token.category == "font":
             config["fontSize"][name_slug] = f"{token.value}px"
 
-    # Remove empty categories
     return {k: v for k, v in config.items() if v}

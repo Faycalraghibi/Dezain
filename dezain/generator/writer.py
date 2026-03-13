@@ -1,8 +1,4 @@
-"""File writer for generated code.
-
-Writes GeneratedFile objects to the output directory
-with proper folder structure.
-"""
+# Copyright © 2026 Dezain. All rights reserved.
 
 from __future__ import annotations
 
@@ -83,22 +79,22 @@ def generate_summary_report(
         lines.append("")
 
     if warnings:
-        lines.append("## ⚠️ Warnings")
+        lines.append("## Warnings")
         lines.append("")
         for w in warnings:
             lines.append(f"- {w}")
         lines.append("")
 
     if errors:
-        lines.append("## ❌ Errors")
+        lines.append("## Errors")
         lines.append("")
         for e in errors:
             lines.append(f"- {e}")
         lines.append("")
 
     if not errors:
-        lines.append("## ✅ Status: Success")
+        lines.append("## Status: Success")
     else:
-        lines.append("## ❌ Status: Failed")
+        lines.append("## Status: Failed")
 
     return "\n".join(lines)

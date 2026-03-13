@@ -1,9 +1,4 @@
-"""CLI entry point for Dezain.
-
-Usage:
-    dezain generate [--file-url URL] [--frame FRAME_ID] [--output DIR] [--sample]
-    dezain init
-"""
+# Copyright © 2026 Dezain. All rights reserved.
 
 from __future__ import annotations
 

@@ -1,1 +1,1 @@
-"""Design system registry and token management."""
+# Copyright © 2026 Dezain. All rights reserved.

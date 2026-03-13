@@ -1,8 +1,4 @@
-"""Generated code validator.
-
-Runs TypeScript compiler and ESLint checks on generated output
-to verify correctness.
-"""
+# Copyright © 2026 Dezain. All rights reserved.
 
 from __future__ import annotations
 

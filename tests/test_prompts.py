@@ -1,4 +1,4 @@
-"""Tests for prompt template rendering."""
+# Copyright © 2026 Dezain. All rights reserved.
 
 from __future__ import annotations
 

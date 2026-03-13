@@ -1,8 +1,5 @@
-"""Design system component registry.
+# Copyright © 2026 Dezain. All rights reserved.
 
-Maps Figma component names to React component imports.
-Uses exact match, then fuzzy matching, with fallback to generic wrapper.
-"""
 
 from __future__ import annotations
 
@@ -53,7 +50,6 @@ class ComponentRegistry:
         """
         key = figma_name.lower()
 
-        # 1. Exact match
         if key in self._mappings:
             m = self._mappings[key]
             return ResolvedComponent(
@@ -62,7 +58,6 @@ class ComponentRegistry:
                 props_mapping=m.props_mapping,
             )
 
-        # 2. Partial match
         for registered_name, m in self._mappings.items():
             if registered_name in key or key in registered_name:
                 logger.info(
@@ -77,7 +72,6 @@ class ComponentRegistry:
                     props_mapping=m.props_mapping,
                 )
 
-        # 3. Fallback
         logger.warning("No mapping found for '%s', falling back to generic wrapper", figma_name)
         safe_name = _to_pascal_case(figma_name)
         return ResolvedComponent(
@@ -93,7 +87,6 @@ class ComponentRegistry:
 
 def _to_pascal_case(name: str) -> str:
     """Convert a string to PascalCase for React component naming."""
-    # Remove special chars and split on separators
     cleaned = name.replace("-", " ").replace("_", " ").replace("/", " ")
     parts = cleaned.split()
     return "".join(word.capitalize() for word in parts) if parts else "UnknownComponent"

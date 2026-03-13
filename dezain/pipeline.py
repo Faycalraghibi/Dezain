@@ -1,8 +1,5 @@
-"""Main pipeline entry point.
+# Copyright © 2026 Dezain. All rights reserved.
 
-Orchestrates the full design-to-code workflow:
-loadConfig → fetchFigma → parseToIR → resolveDesignSystem → generateCode → validate → writeOutput
-"""
 
 from __future__ import annotations
 
