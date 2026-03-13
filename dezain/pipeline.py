@@ -28,6 +28,7 @@ def run_pipeline(
     file_url: str | None = None,
     frame_id: str | None = None,
     output_dir: Path | None = None,
+    preview: bool = False,
 ) -> GenerationResult:
     """Run the full design-to-code pipeline.
 
@@ -37,6 +38,7 @@ def run_pipeline(
         file_url: Override Figma file URL.
         frame_id: Specific frame ID to generate (optional).
         output_dir: Override output directory.
+        preview: If True, scaffolds and launches a Vite preview server.
 
     Returns:
         GenerationResult with all generated files and status.
@@ -121,5 +123,16 @@ def run_pipeline(
     console.print(f"\n📋 Report saved to [cyan]{report_path}[/]")
 
     console.print(Panel("✅ [bold green]Generation complete![/]", expand=False))
+
+    if preview:
+        console.print("\n[bold]Step 7:[/] Launching preview server...")
+        try:
+            from dezain.preview.scaffold import create_preview_scaffold
+            from dezain.preview.server import launch_preview
+
+            preview_dir = create_preview_scaffold(Path(effective_output_dir), result.files)
+            launch_preview(preview_dir, console)
+        except Exception as e:
+            console.print(f"[red]✗ Failed to launch preview server: {e}[/]")
 
     return result

@@ -46,6 +46,12 @@ def generate(
         "-c",
         help="Path to dezain.config.yaml",
     ),
+    preview: bool = typer.Option(
+        False,
+        "--preview",
+        "-p",
+        help="Launch a Vite dev server to preview generated components",
+    ),
 ) -> None:
     """Generate React + TypeScript components from a Figma design."""
     from dezain.config import load_config
@@ -59,6 +65,7 @@ def generate(
         file_url=file_url,
         frame_id=frame,
         output_dir=output,
+        preview=preview,
     )
 
     if not result.success:
