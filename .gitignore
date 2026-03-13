@@ -1,0 +1,31 @@
+# Environment
+.env
+desain-venv/
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.egg-info/
+dist/
+build/
+
+# Testing
+.coverage
+htmlcov/
+.pytest_cache/
+
+# Type checking
+.mypy_cache/
+
+# IDE
+.vscode/
+.idea/
+
+# Output
+generated/
+node_modules/
+
+# Agent
+AGENT.md
+.agent/

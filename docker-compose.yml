@@ -1,0 +1,26 @@
+services:
+  dezain:
+    build: .
+    environment:
+      - FIGMA_TOKEN=${FIGMA_TOKEN}
+      - FIGMA_FILE_URL=${FIGMA_FILE_URL}
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - OPENAI_MODEL=${OPENAI_MODEL:-gpt-4o}
+      - LLM_PROVIDER=${LLM_PROVIDER:-openai}
+      - OUTPUT_DIR=/app/generated
+    volumes:
+      - ./generated:/app/generated
+      - ./dezain.config.yaml:/app/dezain.config.yaml:ro
+
+  # Optional: local LLM via Ollama
+  ollama:
+    image: ollama/ollama:latest
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama_data:/root/.ollama
+    profiles:
+      - local-llm
+
+volumes:
+  ollama_data:

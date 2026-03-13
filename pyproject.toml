@@ -1,0 +1,71 @@
+[build-system]
+requires = ["setuptools>=68.0", "setuptools-scm>=8.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "dezain"
+version = "0.1.0"
+description = "AI-powered Figma design to React + TypeScript code generator"
+readme = "README.md"
+license = {text = "MIT"}
+requires-python = ">=3.11"
+dependencies = [
+    "requests>=2.31",
+    "pydantic>=2.5",
+    "openai>=1.10",
+    "langchain>=0.2",
+    "langchain-openai>=0.1",
+    "langchain-community>=0.2",
+    "typer[all]>=0.9",
+    "rich>=13.0",
+    "pyyaml>=6.0",
+    "python-dotenv>=1.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.0",
+    "pytest-cov>=4.1",
+    "pytest-mock>=3.12",
+    "ruff>=0.3",
+    "mypy>=1.8",
+    "pre-commit>=3.6",
+    "types-requests",
+    "types-PyYAML",
+]
+
+[project.scripts]
+dezain = "dezain.cli:app"
+
+[tool.setuptools.packages.find]
+include = ["dezain*"]
+
+[tool.ruff]
+target-version = "py311"
+line-length = 100
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "N", "UP", "B", "SIM"]
+
+[tool.ruff.format]
+quote-style = "double"
+
+[tool.mypy]
+python_version = "3.11"
+strict = true
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = true
+disable_error_code = ["misc"]
+
+[[tool.mypy.overrides]]
+module = [
+    "langchain.*",
+    "langchain_openai.*",
+    "langchain_community.*",
+]
+ignore_missing_imports = true
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-v --cov=dezain --cov-report=term-missing"

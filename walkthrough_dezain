@@ -1,0 +1,97 @@
+# Dezain — Walkthrough
+
+## What Was Built
+
+A complete AI-powered pipeline that converts **Figma designs → React + TypeScript + TailwindCSS** components.
+
+### Architecture
+
+```mermaid
+graph LR
+    A[Figma API] --> B[Figma Client]
+    B --> C[Design Parser]
+    C --> D[Intermediate Representation]
+    D --> E[LLM Orchestrator]
+    F[Design System Registry] --> E
+    E --> G[Generated .tsx Files]
+    G --> H[Validator]
+    H --> I[Output Directory]
+```
+
+### Project Structure
+
+| Directory | Purpose |
+|---|---|
+| `dezain/figma/` | Figma API client + JSON → IR parser |
+| `dezain/design_system/` | Component registry + Tailwind token mapping |
+| `dezain/generator/` | LLM orchestrator, prompt templates, file writer |
+| `dezain/validation/` | Post-generation code validation |
+| `dezain/cli.py` | Typer CLI (`dezain generate`, `dezain init`) |
+| `dezain/pipeline.py` | Main pipeline orchestration |
+| `tests/` | 76 tests across 8 test modules |
+| `samples/` | Sample Figma API response for demo mode |
+
+---
+
+## Test Results
+
+**76/76 tests passing** with **73% code coverage**.
+
+```
+tests/test_design_tokens.py .............   [ 17%]
+tests/test_figma_client.py .......         [ 26%]
+tests/test_figma_parser.py ...............  [ 46%]
+tests/test_orchestrator.py ...........      [ 60%]
+tests/test_prompts.py ...........           [ 75%]
+tests/test_registry.py .......              [ 84%]
+tests/test_validator.py .....               [ 90%]
+tests/test_writer.py .......                [100%]
+
+76 passed in 0.78s
+```
+
+### Quality Checks
+- ✅ **Ruff lint**: All checks pass
+- ✅ **Ruff format**: All files formatted
+- ✅ **Pre-commit hooks**: Installed (ruff, mypy, pytest)
+- ✅ **GitHub Actions CI**: Configured for Linux + Windows
+
+---
+
+## How to Use
+
+### Quick Start
+```bash
+# Clone & setup
+cd Dezain
+python -m venv desain-venv
+desain-venv\Scripts\activate   # Windows
+pip install -e ".[dev]"
+
+# Initialize config
+dezain init
+
+# Demo mode (no Figma token needed)
+dezain generate --sample
+
+# With Figma
+cp .env.example .env
+# Edit .env with your tokens
+dezain generate --file-url "https://figma.com/file/..."
+```
+
+### Docker
+```bash
+docker compose up dezain          # With OpenAI
+docker compose --profile local-llm up  # With Ollama
+```
+
+---
+
+## Key Design Decisions
+
+1. **Python over Node.js**: LangChain ecosystem is more mature in Python; the tool generates JS/TS but doesn't need to be written in it
+2. **Pydantic IR**: All intermediate data flows through validated Pydantic models for type safety
+3. **Pluggable LLM**: Supports OpenAI (cloud) and Ollama (local) via config switch
+4. **JSON output schema**: LLM responses are enforced to return structured JSON, with fallback extraction for non-clean responses
+5. **TDD**: Tests written for all modules, run on every commit via pre-commit hooks

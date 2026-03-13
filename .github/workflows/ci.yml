@@ -1,0 +1,53 @@
+name: CI
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main]
+
+jobs:
+  lint-and-test:
+    name: Lint & Test (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+        python-version: ["3.11"]
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Create venv and install dependencies
+        run: |
+          python -m venv desain-venv
+          ${{ matrix.os == 'windows-latest' && 'desain-venv\\Scripts\\activate' || 'source desain-venv/bin/activate' }}
+          python -m pip install --upgrade pip
+          pip install -e ".[dev]"
+
+      - name: Ruff lint
+        run: |
+          ${{ matrix.os == 'windows-latest' && 'desain-venv\\Scripts\\activate' || 'source desain-venv/bin/activate' }}
+          ruff check dezain/ tests/
+
+      - name: Ruff format check
+        run: |
+          ${{ matrix.os == 'windows-latest' && 'desain-venv\\Scripts\\activate' || 'source desain-venv/bin/activate' }}
+          ruff format --check dezain/ tests/
+
+      - name: Mypy type check
+        run: |
+          ${{ matrix.os == 'windows-latest' && 'desain-venv\\Scripts\\activate' || 'source desain-venv/bin/activate' }}
+          mypy dezain/
+
+      - name: Pytest
+        run: |
+          ${{ matrix.os == 'windows-latest' && 'desain-venv\\Scripts\\activate' || 'source desain-venv/bin/activate' }}
+          pytest
