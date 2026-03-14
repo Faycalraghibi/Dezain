@@ -114,7 +114,6 @@ mypy dezain/ tests/
 
 > **Note:** Install git-hooks via `pre-commit install` to automatically validate pushes.
 
----
 
 ## License
 MIT License
