@@ -8,7 +8,6 @@
   [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 </div>
 
----
 
 Dezain is a TDD-driven pipeline that maps Figma designs into functional React components using LangChain, OpenAI, and Ollama. It enforces strict type-safety, robust testing, and automated AST validation.
 
@@ -20,8 +19,6 @@ Dezain is a TDD-driven pipeline that maps Figma designs into functional React co
 - **Automated Validation**: Scaffolds ASTs and compiles against `tsc` prior to output to ensure syntax validity.
 - **Live Preview Server**: Instantiates a Vite dev server to render generated components locally post-generation.
 - **Multi-Frame Processing**: Accepts targeted `--frame` ID arrays for deep, modular component extraction.
-
----
 
 ## Architecture
 
@@ -48,7 +45,6 @@ graph LR
     end
 ```
 
----
 
 ## Quick Start
 
@@ -90,8 +86,6 @@ dezain generate --file-url "https://figma.com/file/XXXXX/Design"
 dezain generate --file-url "..." --frame "1:2" --frame "3:4"
 ```
 
----
-
 ## Docker Support
 
 Run isolated generation or self-hosted LLM workflows:
@@ -103,7 +97,6 @@ docker compose up dezain
 docker compose --profile local-llm up
 ```
 
----
 
 ## Development & Testing
 
