@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from pathlib import Path
+from unittest.mock import patch
 
 from dezain.validation.validator import validate_generated_code
 
@@ -23,7 +24,11 @@ class TestValidateGeneratedCode:
             '  <button className="px-4 py-2 bg-blue-500">{children}</button>\n'
             ");\n"
         )
-        result = validate_generated_code(tmp_path)
+
+        with patch("dezain.validation.validator._run_tsc") as mock_tsc:
+            mock_tsc.return_value = []
+            result = validate_generated_code(tmp_path)
+
         assert result.passed is True
         assert result.total_errors == 0
 
