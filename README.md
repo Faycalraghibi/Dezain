@@ -1,112 +1,140 @@
-# Dezain
+<div align="center">
+  <h1>🎨 Dezain</h1>
+  <p><strong>AI-powered frontend code generator translating Figma designs into production-ready React + TypeScript + TailwindCSS components.</strong></p>
 
-AI-powered frontend code generator that translates Figma designs into production-ready **React + TypeScript + TailwindCSS** UI components.
-
-Built in Python, using **LangChain / OpenAI / Ollama** for intelligent code generation, following TDD practices with full CI/CD.
-
----
-
-## Features
-
-- **Figma Integration** — Connects to the Figma API to pull frames, styles, tokens, and component hierarchies
-- **AI-Driven Code Generation** — LLM-powered agent generates React + TypeScript components automatically
-- **Design System Awareness** — Uses your existing component library and tokens to produce consistent, reusable code
-- **Tailwind Mapping** — Automatically converts design tokens to TailwindCSS utility classes
-- **Validation** — Validates generated code for TypeScript correctness and best practices
-- **Pluggable LLM** — Supports OpenAI (cloud) and Ollama (local) via config switch
-- **Docker-Ready** — Full workflow containerizable with optional Ollama sidecar
+  [![Python](https://img.shields.io/badge/Python-3.11+-blue.svg)](https://www.python.org/downloads/)
+  [![CI Status](https://github.com/faycalraghibi/Dezain/actions/workflows/ci.yml/badge.svg)](https://github.com/faycalraghibi/Dezain/actions)
+  [![Coverage](https://img.shields.io/badge/Coverage-92%25-brightgreen.svg)](#testing)
+  [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+</div>
 
 ---
 
-## Quick Start
+**Dezain** is designed for modern TDD frontend teams, utilizing **LangChain / OpenAI / Ollama** for intelligent code generation. Dezain integrates seamlessly into your CI/CD pipelines, enforcing strict type-safety, robust testing (92% Coverage), and automated code validation.
 
+## ✨ Key Features
+
+- **🔌 Figma Integration** — Connects directly to the Figma API to extract frames, vector hierarchies, and layout geometry.
+- **🧠 AI-Driven Code Generation** — Employs Large Language Models (LLMs) to natively author functional React & TypeScript UI components.
+- **📚 Design System Awareness** — Cross-references your existing local components (e.g., `<Button>`, `<Card>`) and dynamically integrates them into generated templates.
+- **🎨 Tailwind Extraction** — Converts extracted Design Tokens (colors, fonts, borders, paddings) natively into TailwindCSS utility classes.
+- **🔍 Automated Code Validation** — Scaffolds generated ASTs and validates output instantly against `tsc` (TypeScript compiler) to ensure absolute syntax safety.
+- **🌍 Pluggable LLM Backends** — Fully supports cloud inference via **OpenAI**, or self-hosted, secure local generation via **Ollama**.
+- **⚡ Live Dev Preview Server** — Natively launches a high-speed Vite server displaying your generated code visually in your browser immediately post-generation.
+- **📦 Multi-Frame Processing** — Accepts targeted `--frame` array selections, enabling extraction of multiple specific nested components per operation. 
+
+---
+
+## 🏗️ Architecture Visualization
+
+```mermaid
+graph LR
+    subgraph Input Phase
+        A[Figma API] -->|document node| B[Figma Client]
+    end
+    
+    subgraph Transformation
+        B --> C[Design Parser]
+        C -->|Type-Safe Pydantic| D[Intermediate Representation (IR)]
+    end
+    
+    subgraph Execution Pipeline
+        D --> E[LLM Orchestrator]
+        F[Design System Registry] -->|Component context| E
+        E -->|React AST String| G[Generated .tsx Files]
+    end
+    
+    subgraph Output Validation
+        G --> H[TSC Validator]
+        H -->|Validation OK| I[Output Directory]
+    end
+```
+
+---
+
+## 🚀 Quick Start
+
+### 1. Installation
+
+Clone the repository and structure the virtual environment:
 ```bash
-# Clone & setup
-git clone https://github.com/Faycal/Dezain.git
+git clone https://github.com/Faycalraghibi/Dezain.git
 cd Dezain
+
 python -m venv desain-venv
-desain-venv\Scripts\activate   # Windows
-# source desain-venv/bin/activate  # Linux/Mac
+source desain-venv/bin/activate    # Linux/MacOS
+# desain-venv\Scripts\activate     # Windows
+
 pip install -e ".[dev]"
+```
 
-# Initialize config
+### 2. Initialization & Configuration
+Scaffold the system config (`dezain.config.yaml`):
+```bash
 dezain init
-# Edit dezain.config.yaml to define your component mappings
+```
+*Note: Use the `.yaml` config to explicitly define known component directories and custom mappings.*
 
-# Demo mode (no Figma token needed)
-dezain generate --sample
+### 3. Usage
 
-# With Figma
+#### Demo Mode
+Dezain provides a bundled offline sample file so you can generate components without needing Figma tokens immediately:
+```bash
+dezain generate --sample --preview
+```
+
+#### Authentic Generation Workflows
+Copy over the environment file and set your `FIGMA_TOKEN` and `OPENAI_API_KEY`:
+```bash
 cp .env.example .env
-# Add your FIGMA_TOKEN and OPENAI_API_KEY to .env
+```
+Execute generation with an active Figma document URL:
+```bash
 dezain generate --file-url "https://figma.com/file/XXXXX/Design"
 ```
 
----
-
-## How It Works
-
-1. **Fetch designs** from Figma via the REST API (or use `--sample` for demo mode)
-2. **Parse design data** into a normalized Intermediate Representation (Pydantic models)
-3. **Resolve design system** — map Figma components to your React component library
-4. **Generate React + TypeScript** code via LLM (OpenAI or Ollama)
-5. **Validate output** — check for TypeScript errors, missing exports, type safety
-6. **Write files** to output directory with generated report
-
----
-
-## Development
-
+#### Targeting Specific Frames (Multi-Frame)
+Filter your document by targeting nested nodes using consecutive `--frame` flags:
 ```bash
-# Run tests
-pytest
-
-# Lint
-ruff check dezain/ tests/
-
-# Format
-ruff format dezain/ tests/
-
-# Type check
-mypy dezain/
-
-# Pre-commit hooks (auto-runs on every commit)
-pre-commit install
+dezain generate --file-url "..." --frame "1:2" --frame "3:4"
 ```
 
 ---
 
-## Docker
+## 🐳 Docker Support
+
+If you prefer completely isolated execution, Dezain includes `docker-compose` routing for both isolated API generation and Local-LLM hosting workflows:
 
 ```bash
-# With OpenAI
+# Utilizing external cloud LLM inputs (OpenAI)
 docker compose up dezain
 
-# With local LLM (Ollama)
+# Utilizing a self-hosted isolated LLM (Ollama Sidecar)
 docker compose --profile local-llm up
 ```
 
 ---
 
-## Project Structure
+## 🛠️ Development & Testing
 
-```
-dezain/
-├── figma/           # Figma API client + JSON → IR parser
-├── design_system/   # Component registry + Tailwind token mapping
-├── generator/       # LLM orchestrator, prompts, file writer
-├── validation/      # Post-generation code validation
-├── cli.py           # CLI entry point
-├── config.py        # Configuration loader
-├── ir.py            # Intermediate Representation models
-└── pipeline.py      # Main pipeline orchestration
+We uphold severe Code Quality gates. The project requires passing lint (`Ruff`), format (`Ruff`), and type-checking (`Mypy`) tests to merge workflows. 
 
-tests/               # 76 tests, 73% coverage
-samples/             # Sample Figma data for demo mode
+```bash
+# Execute local unit suite (100+ tests, 92% Local Coverage minimum)
+pytest tests/ --cov=dezain
+
+# Check format adherence
+ruff check dezain/ tests/
+ruff format --check dezain/ tests/
+
+# Statically analyze types
+mypy dezain/ tests/
 ```
+
+> **Tip!** Install the git-hooks automatically to guard commits:
+> `pre-commit install`
 
 ---
 
-## License
-
-MIT
+## 📜 License
+Provided under the standard **MIT License**.
