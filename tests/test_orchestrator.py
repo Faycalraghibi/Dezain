@@ -8,7 +8,7 @@ from unittest.mock import MagicMock, patch
 from dezain.config import LLMConfig
 from dezain.generator.orchestrator import LLMOrchestrator, _extract_json, _generate_barrel_file
 from dezain.generator.types import GeneratedFile
-from dezain.ir import IRDesign, IRNode
+from dezain.ir import IRDesign, IRNode, NodeType
 
 _SAMPLE_CONTENT = (
     'import React from "react";\n\nexport const PrimaryButton = () => <button>Click</button>;'
@@ -143,7 +143,9 @@ class TestOrchestrator:
         orch = LLMOrchestrator(config, stream=False)
 
         # 6 top-level nodes
-        nodes = [IRNode(id=f"1:{i}", name=f"Component{i}", type="component") for i in range(6)]
+        nodes = [
+            IRNode(id=f"1:{i}", name=f"Component{i}", type=NodeType.COMPONENT) for i in range(6)
+        ]
         design = IRDesign(name="Test", nodes=nodes, tokens=[])
 
         result = orch.generate_from_design(design)
