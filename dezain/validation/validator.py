@@ -53,7 +53,7 @@ def validate_generated_code(output_dir: Path) -> ValidationResult:
             result.lint_errors.extend(errors)
             result.passed = False
 
-    tsc_errors = _run_tsc(output_dir)
+    tsc_errors = _run_tsc(output_dir, tsx_files)
     if tsc_errors:
         result.typescript_errors.extend(tsc_errors)
         result.passed = False
@@ -89,7 +89,7 @@ def _check_file_basics(file_path: Path) -> list[str]:
     return errors
 
 
-def _run_tsc(output_dir: Path) -> list[str]:
+def _run_tsc(output_dir: Path, files: list[Path]) -> list[str]:
     """Run TypeScript compiler on the output directory.
 
     Returns list of error strings (empty if tsc passes or isn't available).
@@ -97,8 +97,11 @@ def _run_tsc(output_dir: Path) -> list[str]:
     errors: list[str] = []
 
     try:
+        cmd = ["npx", "tsc", "--noEmit", "--strict", "--jsx", "react-jsx"]
+        cmd.extend(str(f.relative_to(output_dir)) for f in files)
+
         result = subprocess.run(
-            ["npx", "tsc", "--noEmit", "--strict", "--jsx", "react-jsx"],
+            cmd,
             cwd=str(output_dir),
             capture_output=True,
             text=True,
