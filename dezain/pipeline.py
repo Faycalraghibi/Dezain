@@ -26,7 +26,7 @@ def run_pipeline(
     config: DezainConfig | None = None,
     sample_mode: bool = False,
     file_url: str | None = None,
-    frame_id: str | None = None,
+    frame_ids: list[str] | None = None,
     output_dir: Path | None = None,
     preview: bool = False,
 ) -> GenerationResult:
@@ -36,7 +36,7 @@ def run_pipeline(
         config: Pipeline configuration. Loaded from defaults if None.
         sample_mode: If True, use sample data instead of Figma API.
         file_url: Override Figma file URL.
-        frame_id: Specific frame ID to generate (optional).
+        frame_ids: Specific frame IDs to generate (optional).
         output_dir: Override output directory.
         preview: If True, scaffolds and launches a Vite preview server.
 
@@ -74,7 +74,7 @@ def run_pipeline(
     console.print(f"  ✓ Loaded design: [green]{figma_file.name}[/]")
 
     console.print("\n[bold]Step 2:[/] Parsing design to intermediate representation...")
-    ir_design = parse_figma_file(figma_file)
+    ir_design = parse_figma_file(figma_file, frame_ids=frame_ids)
     console.print(
         f"  ✓ Parsed [green]{len(ir_design.nodes)}[/] nodes, "
         f"[green]{len(ir_design.tokens)}[/] tokens"

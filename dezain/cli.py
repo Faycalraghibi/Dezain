@@ -23,10 +23,10 @@ def generate(
         "-f",
         help="Figma file URL to process",
     ),
-    frame: str | None = typer.Option(  # noqa: UP007
+    frame: list[str] | None = typer.Option(  # noqa: B008
         None,
         "--frame",
-        help="Specific Figma frame/node ID to generate",
+        help="Specific Figma frame/node ID to generate (can be specified multiple times)",
     ),
     output: Path = typer.Option(  # noqa: B008
         Path("./generated"),
@@ -63,7 +63,7 @@ def generate(
         config=config,
         sample_mode=sample,
         file_url=file_url,
-        frame_id=frame,
+        frame_ids=frame,
         output_dir=output,
         preview=preview,
     )

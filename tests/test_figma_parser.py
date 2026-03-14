@@ -104,3 +104,27 @@ class TestParseFigmaFile:
         categories = {t.category for t in design.tokens}
         assert "color" in categories
         assert "font" in categories
+
+    def test_parses_file_with_frame_ids(self) -> None:
+        """Should filter and parse only requested frame IDs."""
+        node1 = FigmaNode(id="1:1", name="Frame 1", type="FRAME")
+        node2 = FigmaNode(id="2:2", name="Frame 2", type="FRAME")
+        node3 = FigmaNode(
+            id="3:3",
+            name="Frame 3",
+            type="FRAME",
+            children=[FigmaNode(id="3:4", name="Inner", type="RECTANGLE")],
+        )
+        canvas = FigmaNode(id="0:0", name="Canvas", type="CANVAS", children=[node1, node2, node3])
+        doc = FigmaNode(id="doc", name="Doc", type="DOCUMENT", children=[canvas])
+        figma_file = FigmaFile(name="Test", document=doc, components={}, styles={})
+
+        # Only request 2:2 and 3:4 (a nested node)
+        design = parse_figma_file(figma_file, frame_ids=["2:2", "3:4"])
+
+        assert len(design.nodes) == 2
+        # Check that we found exactly the requested nodes
+        names = {n.name for n in design.nodes}
+        assert "Frame 2" in names
+        assert "Inner" in names
+        assert "Frame 1" not in names

@@ -19,7 +19,20 @@ def test_cli_generate_success(mock_run_pipeline: MagicMock, tmp_path: Path) -> N
 
     out_dir = tmp_path / "out"
 
-    result = runner.invoke(app, ["generate", "--sample", "--preview", "-o", str(out_dir)])
+    result = runner.invoke(
+        app,
+        [
+            "generate",
+            "--sample",
+            "--preview",
+            "-o",
+            str(out_dir),
+            "--frame",
+            "1:2",
+            "--frame",
+            "3:4",
+        ],
+    )
 
     # Assert
     assert result.exit_code == 0
@@ -29,6 +42,7 @@ def test_cli_generate_success(mock_run_pipeline: MagicMock, tmp_path: Path) -> N
     assert call_kwargs["sample_mode"] is True
     assert call_kwargs["preview"] is True
     assert call_kwargs["output_dir"] == out_dir
+    assert call_kwargs["frame_ids"] == ["1:2", "3:4"]
 
 
 @patch("dezain.pipeline.run_pipeline")

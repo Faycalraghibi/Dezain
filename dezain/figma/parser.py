@@ -42,11 +42,13 @@ _NODE_TYPE_MAP: dict[str, NodeType] = {
 }
 
 
-def parse_figma_file(figma_file: FigmaFile) -> IRDesign:
+def parse_figma_file(figma_file: FigmaFile, frame_ids: list[str] | None = None) -> IRDesign:
     """Parse a full Figma file into an IRDesign.
 
     Args:
         figma_file: Parsed Figma file response.
+        frame_ids: Optional list of specific frame IDs to parse. If provided,
+            only these frames (and their children) will be included in the parsed IR.
 
     Returns:
         Normalized IRDesign with all nodes and extracted tokens.
@@ -54,10 +56,19 @@ def parse_figma_file(figma_file: FigmaFile) -> IRDesign:
     tokens: list[IRToken] = []
     nodes: list[IRNode] = []
 
-    for canvas in figma_file.document.children:
-        for child in canvas.children:
-            ir_node = _convert_node(child)
-            nodes.append(ir_node)
+    if frame_ids:
+        found_nodes: list[FigmaNode] = []
+        for canvas in figma_file.document.children:
+            for child in canvas.children:
+                _find_nodes_by_id(child, frame_ids, found_nodes)
+
+        for figma_node in found_nodes:
+            nodes.append(_convert_node(figma_node))
+    else:
+        for canvas in figma_file.document.children:
+            for child in canvas.children:
+                ir_node = _convert_node(child)
+                nodes.append(ir_node)
 
     tokens.extend(_extract_tokens_from_file(figma_file))
 
@@ -67,6 +78,15 @@ def parse_figma_file(figma_file: FigmaFile) -> IRDesign:
         nodes=nodes,
         tokens=tokens,
     )
+
+
+def _find_nodes_by_id(node: FigmaNode, target_ids: list[str], found_nodes: list[FigmaNode]) -> None:
+    """Recursively search for Figma nodes matching any of the target IDs."""
+    if node.id in target_ids:
+        found_nodes.append(node)
+        return
+    for child in node.children:
+        _find_nodes_by_id(child, target_ids, found_nodes)
 
 
 def parse_figma_node(figma_node: FigmaNode) -> IRNode:

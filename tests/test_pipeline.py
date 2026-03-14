@@ -61,7 +61,7 @@ def test_run_pipeline_sample_mode(
     # Assert basic flow
     assert result == mock_gen_result
     mock_load_sample.assert_called_once()
-    mock_parse.assert_called_once_with(mock_figma_file)
+    mock_parse.assert_called_once_with(mock_figma_file, frame_ids=None)
     mock_orch_instance.generate_from_design.assert_called_once_with(mock_ir_design)
     mock_write.assert_called_once_with(mock_gen_result.files, out_dir)
     mock_validate.assert_called_once_with(out_dir)
