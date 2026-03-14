@@ -132,6 +132,25 @@ class TestOrchestrator:
         paths = [f.path for f in result.files]
         assert any("index.ts" in p for p in paths)
 
+    @patch.object(
+        LLMOrchestrator,
+        "_call_llm",
+        return_value='{"files": [{"path": "dummy.tsx", "content": ""}]}',
+    )
+    def test_generate_sequential_fallback_many_children(self, mock_llm: MagicMock) -> None:
+        """Should fall back to sequential generation if design has more than 5 nodes."""
+        config = LLMConfig(provider="openai", openai_api_key="test")
+        orch = LLMOrchestrator(config, stream=False)
+
+        # 6 top-level nodes
+        nodes = [IRNode(id=f"1:{i}", name=f"Component{i}", type="component") for i in range(6)]
+        design = IRDesign(name="Test", nodes=nodes, tokens=[])
+
+        result = orch.generate_from_design(design)
+
+        assert result.success
+        assert mock_llm.call_count == 6
+
 
 class TestOpenAIStreaming:
     """Tests for OpenAI streaming accumulation."""
@@ -161,6 +180,24 @@ class TestOpenAIStreaming:
         mock_client.chat.completions.create.assert_called_once()
         call_kwargs = mock_client.chat.completions.create.call_args
         assert call_kwargs.kwargs.get("stream") is True
+
+    @patch("openai.OpenAI")
+    def test_openai_non_streaming(self, mock_openai_cls: MagicMock) -> None:
+        """Should handle OpenAI non-streaming successfully."""
+        mock_client = MagicMock()
+        mock_openai_cls.return_value = mock_client
+        mock_response = MagicMock()
+        mock_response.choices = [MagicMock()]
+        mock_response.choices[0].message.content = '{"files": [{"path": "a.tsx", "content": "x"}]}'
+        mock_response.usage.total_tokens = 42
+        mock_client.chat.completions.create.return_value = mock_response
+
+        config = LLMConfig(provider="openai", openai_api_key="test-key")
+        orch = LLMOrchestrator(config, stream=False)
+        result = orch._call_openai("generate a button")
+
+        assert result == '{"files": [{"path": "a.tsx", "content": "x"}]}'
+        mock_client.chat.completions.create.assert_called_once()
 
 
 class TestOllamaStreaming:
@@ -194,3 +231,26 @@ class TestOllamaStreaming:
         mock_post.assert_called_once()
         call_kwargs = mock_post.call_args
         assert call_kwargs.kwargs.get("stream") is True
+
+    @patch("requests.post")
+    def test_ollama_non_streaming(self, mock_post: MagicMock) -> None:
+        """Should handle Ollama non-streaming successfully."""
+        mock_resp = MagicMock()
+        mock_resp.status_code = 200
+        mock_resp.json.return_value = {
+            "message": {"content": '{"files": [{"path": "b.tsx", "content": "y"}]}'},
+            "prompt_eval_count": 10,
+            "eval_count": 20,
+        }
+        mock_post.return_value = mock_resp
+
+        config = LLMConfig(
+            provider="ollama",
+            ollama_base_url="http://localhost:11434",
+            ollama_model="test",
+        )
+        orch = LLMOrchestrator(config, stream=False)
+        result = orch._call_ollama("generate a card")
+
+        assert result == '{"files": [{"path": "b.tsx", "content": "y"}]}'
+        mock_post.assert_called_once()
